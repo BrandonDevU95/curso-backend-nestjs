@@ -1,8 +1,11 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -31,10 +34,10 @@ export class UsersController {
   getUserById(@Param('id') id: string) {
     const user = this.users.find((user) => user.id === id);
     if (!user) {
-      return {
-        statusCode: 404,
-        message: 'User not found',
-      };
+      throw new NotFoundException('User not found');
+    }
+    if (user.id === '1') {
+      throw new ForbiddenException('Access to this user is forbidden');
     }
     return user;
   }
@@ -57,10 +60,7 @@ export class UsersController {
   deleteUser(@Param('id') id: string) {
     const index = this.users.findIndex((user) => user.id === id);
     if (index === -1) {
-      return {
-        statusCode: 404,
-        message: 'User not found',
-      };
+      throw new NotFoundException('User not found');
     }
     this.users.splice(index, 1);
     return {
@@ -73,17 +73,11 @@ export class UsersController {
   updateUser(@Param('id') id: string, @Body() body: Partial<User>) {
     const user = this.users.find((user) => user.id === id);
     if (!user) {
-      return {
-        statusCode: 404,
-        message: 'User not found',
-      };
+      throw new NotFoundException('User not found');
     }
     const email = body?.email;
     if (email && !email.includes('@')) {
-      return {
-        statusCode: 400,
-        message: 'Invalid email format',
-      };
+      throw new BadRequestException('Invalid email format');
     }
     Object.assign(user, body);
     return {
