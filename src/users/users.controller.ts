@@ -10,6 +10,7 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
+import { CreateUserDto } from './user.dto';
 
 interface User {
   id: string;
@@ -43,7 +44,7 @@ export class UsersController {
   }
 
   @Post()
-  createUser(@Body() body: User) {
+  createUser(@Body() body: CreateUserDto) {
     const newUser = {
       ...body,
       id: (this.users.length + 1).toString(),
