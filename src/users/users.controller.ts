@@ -1,4 +1,12 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 
 interface User {
   id: string;
@@ -20,7 +28,61 @@ export class UsersController {
   }
 
   @Get(':id')
-  getUserById(@Param('id') id: string): User | undefined {
-    return this.users.find((user) => user.id === id);
+  getUserById(@Param('id') id: string) {
+    const user = this.users.find((user) => user.id === id);
+    if (!user) {
+      return {
+        statusCode: 404,
+        message: 'User not found',
+      };
+    }
+    return user;
+  }
+
+  @Post()
+  createUser(@Body() body: User) {
+    const newUser = {
+      ...body,
+      id: (this.users.length + 1).toString(),
+    };
+    this.users.push(newUser);
+    return {
+      statusCode: 201,
+      message: 'User created successfully',
+      user: newUser,
+    };
+  }
+
+  @Delete(':id')
+  deleteUser(@Param('id') id: string) {
+    const index = this.users.findIndex((user) => user.id === id);
+    if (index === -1) {
+      return {
+        statusCode: 404,
+        message: 'User not found',
+      };
+    }
+    this.users.splice(index, 1);
+    return {
+      statusCode: 200,
+      message: 'User deleted successfully',
+    };
+  }
+
+  @Put(':id')
+  updateUser(@Param('id') id: string, @Body() body: Partial<User>) {
+    const user = this.users.find((user) => user.id === id);
+    if (!user) {
+      return {
+        statusCode: 404,
+        message: 'User not found',
+      };
+    }
+    Object.assign(user, body);
+    return {
+      statusCode: 200,
+      message: 'User updated successfully',
+      user,
+    };
   }
 }
