@@ -78,6 +78,13 @@ export class UsersController {
         message: 'User not found',
       };
     }
+    const email = body?.email;
+    if (email && !email.includes('@')) {
+      return {
+        statusCode: 400,
+        message: 'Invalid email format',
+      };
+    }
     Object.assign(user, body);
     return {
       statusCode: 200,
