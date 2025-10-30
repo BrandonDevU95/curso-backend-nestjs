@@ -10,7 +10,7 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { CreateUserDto } from './user.dto';
+import { CreateUserDto, UpdateUserDto } from './user.dto';
 
 interface User {
   id: string;
@@ -71,14 +71,10 @@ export class UsersController {
   }
 
   @Put(':id')
-  updateUser(@Param('id') id: string, @Body() body: Partial<User>) {
+  updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
     const user = this.users.find((user) => user.id === id);
     if (!user) {
       throw new NotFoundException('User not found');
-    }
-    const email = body?.email;
-    if (email && !email.includes('@')) {
-      throw new BadRequestException('Invalid email format');
     }
     Object.assign(user, body);
     return {
