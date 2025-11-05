@@ -1,86 +1,43 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
-  ForbiddenException,
   Get,
-  NotFoundException,
   Param,
   Post,
   Put,
 } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from './user.dto';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+import { User } from './user.model';
+import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
-  private users: User[] = [
-    { id: '1', name: 'Alice', email: 'alice@example.com' },
-    { id: '2', name: 'Bob', email: 'bob@example.com' },
-    { id: '3', name: 'Charlie', email: 'charlie@example.com' },
-  ];
+  constructor(private userService: UsersService) {}
 
   @Get()
   getAllUsers(): User[] {
-    return this.users;
+    return this.userService.findAll();
   }
 
   @Get(':id')
   getUserById(@Param('id') id: string) {
-    const user = this.users.find((user) => user.id === id);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    if (user.id === '1') {
-      throw new ForbiddenException('Access to this user is forbidden');
-    }
-    return user;
+    return this.userService.getUserById(id);
   }
 
   @Post()
-  createUser(@Body() body: CreateUserDto) {
-    const newUser = {
-      ...body,
-      id: (this.users.length + 1).toString(),
-    };
-    this.users.push(newUser);
-    return {
-      statusCode: 201,
-      message: 'User created successfully',
-      user: newUser,
-    };
-  }
-
-  @Delete(':id')
-  deleteUser(@Param('id') id: string) {
-    const index = this.users.findIndex((user) => user.id === id);
-    if (index === -1) {
-      throw new NotFoundException('User not found');
-    }
-    this.users.splice(index, 1);
-    return {
-      statusCode: 200,
-      message: 'User deleted successfully',
-    };
+  createUser(@Body() user: CreateUserDto) {
+    const newUser = this.userService.create(user);
+    return newUser;
   }
 
   @Put(':id')
   updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
-    const user = this.users.find((user) => user.id === id);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    Object.assign(user, body);
-    return {
-      statusCode: 200,
-      message: 'User updated successfully',
-      user,
-    };
+    return this.userService.update(id, body);
+  }
+
+  @Delete(':id')
+  deleteUser(@Param('id') id: string) {
+    return this.userService.delete(id);
   }
 }
