@@ -4,11 +4,11 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
 } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from './user.dto';
-import { User } from './user.model';
 import { UsersService } from './users.service';
 
 @Controller('users')
@@ -16,12 +16,12 @@ export class UsersController {
   constructor(private userService: UsersService) {}
 
   @Get()
-  getAllUsers(): User[] {
+  getAllUsers() {
     return this.userService.findAll();
   }
 
   @Get(':id')
-  getUserById(@Param('id') id: string) {
+  getUserById(@Param('id', ParseIntPipe) id: number) {
     return this.userService.getUserById(id);
   }
 
@@ -32,12 +32,15 @@ export class UsersController {
   }
 
   @Put(':id')
-  updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
+  updateUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: UpdateUserDto,
+  ) {
     return this.userService.update(id, body);
   }
 
   @Delete(':id')
-  deleteUser(@Param('id') id: string) {
+  deleteUser(@Param('id', ParseIntPipe) id: number) {
     return this.userService.delete(id);
   }
 }
